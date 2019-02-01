@@ -21,11 +21,11 @@ public class FGTAMain {
 
         double dt = 0.01;
         double dx = 0.1;
-        int k = 2;
+        double D = 0.0108;
         double c_max = 10.5;
-        System.out.println(c_max);
+        //System.out.println(c_max);
 
-        BioSystem.exponentialGradient_spatialAndGRateDistributions(c_max, dt, dx);
+        BioSystem.exponentialGradient_spatialAndGRateDistributions(c_max, D, dt, dx);
     }
 
 

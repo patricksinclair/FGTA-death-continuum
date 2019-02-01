@@ -1,21 +1,24 @@
+import javax.tools.Tool;
 import java.util.Arrays;
 import java.util.Random;
 
 public class BioSystem {
 
-    private int L, K, s, s_max;
+    private int L, K;
+    private double s, s_max;
     private double c, alpha, timeElapsed, dt, dx;
-    private double D = 0.1; //diffusion constant
+    private double D; //diffusion constant
 
     private Microhabitat[] microhabitats;
     Random rand = new Random();
     private int initialPop = 100;
 
-    public BioSystem(int L, int S, double alpha, double dt, double dx){
+    public BioSystem(int L, double S, double D, double alpha, double dt, double dx){
 
         this.L = L;
         this.s = S;
         this.s_max = S;
+        this.D = D;
         this.alpha = alpha;
         this.dt = dt;
         this.dx = dx;
@@ -26,13 +29,17 @@ public class BioSystem {
             double c_i = Math.exp(alpha*(double)i) - 1.;
             microhabitats[i] = new Microhabitat(S, c_i);
         }
-        microhabitats[0].fillWithWildType(initialPop);
+
+        for(int i = 0; i < 20; i++){
+            microhabitats[i].fillWithWildType(20-i);
+        }
+
     }
 
     public int getL(){
         return L;
     }
-    public int getS(){return s;}
+    public double getS(){return s;}
     public double getTimeElapsed(){
         return timeElapsed;
     }
@@ -46,32 +53,32 @@ public class BioSystem {
         return microhabitats[i];
     }
 
-    public int getTotalN(){
-        int runningTotal = 0;
+    public double getTotalN(){
+        double runningTotal = 0;
         for(Microhabitat m : microhabitats) {
             runningTotal += m.getN_alive()+m.getN_dead();
         }
         return runningTotal;
     }
 
-    public int getCurrentLivePopulation(){
-        int runningTotal = 0;
+    public double getCurrentLivePopulation(){
+        double runningTotal = 0;
         for(Microhabitat m : microhabitats) {
             runningTotal += m.getN_alive();
         }
         return runningTotal;
     }
 
-    public int[] getLiveSpatialDistributionArray(){
-        int[] mh_pops = new int[L];
+    public double[] getLiveSpatialDistributionArray(){
+        double[] mh_pops = new double[L];
         for(int i = 0; i < L; i++){
             mh_pops[i] = microhabitats[i].getN_alive();
         }
         return mh_pops;
     }
 
-    public int[] getDeadSpatialDistributionArray(){
-        int[] mh_pops = new int[L];
+    public double[] getDeadSpatialDistributionArray(){
+        double[] mh_pops = new double[L];
         for(int i = 0; i < L; i++){
             mh_pops[i] = microhabitats[i].getN_dead();
         }
@@ -87,8 +94,8 @@ public class BioSystem {
         return mh_gRates;
     }
 
-    public int[] getNutrientsArray(){
-        int[] mh_S = new int[L];
+    public double[] getNutrientsArray(){
+        double[] mh_S = new double[L];
         for(int i = 0; i < L; i++){
             mh_S[i] = microhabitats[i].getS();
         }
@@ -102,9 +109,9 @@ public class BioSystem {
 
         for(int i = 0; i < L; i++){
 
-            int s_i = microhabitats[i].getS();
-            int nalive_i = microhabitats[i].getN_alive();
-            int ndead_i = microhabitats[i].getN_dead();
+            double s_i = microhabitats[i].getS();
+            double nalive_i = microhabitats[i].getN_alive();
+            double ndead_i = microhabitats[i].getN_dead();
 
             if(microhabitats[i].itIsGrowing()){
 
@@ -113,30 +120,30 @@ public class BioSystem {
 
 
                 if(i==0){
-                    nalive_i += dt*(D*(microhabitats[i+1].getN_alive() + 0 - 2*nalive_i)/(dx*dx) + nalive_i*growthRate_i);
+                    nalive_i += dt*(D*(microhabitats[i+1].getN_alive() + nalive_i - 2*nalive_i)/(dx*dx) + nalive_i*growthRate_i);
                 }else if(i==L-1){
-                    nalive_i += dt*(D*(0 + microhabitats[i-1].getN_alive() - 2*nalive_i)/(dx*dx)+ nalive_i*growthRate_i);
+                    nalive_i += dt*(D*(nalive_i + microhabitats[i-1].getN_alive() - 2*nalive_i)/(dx*dx)+ nalive_i*growthRate_i);
                 }else{
                     nalive_i += dt*(D*(microhabitats[i+1].getN_alive() + microhabitats[i-1].getN_alive() - 2*nalive_i)/(dx*dx)
                             + nalive_i*growthRate_i);
                 }
 
             }else{
-                double deathRate_i = microhabitats[i].death_rate();
+                double deathRate_i = microhabitats[i].death_rate(); //this is a -ve value
                 //growth rate is -ve so no change in nutrients
                 if(i==0){
-                    double deltaN = dt*(D*(microhabitats[i+1].getN_alive() + 0 - 2*nalive_i)/(dx*dx) - nalive_i*deathRate_i);
+                    double deltaN = dt*(D*(microhabitats[i+1].getN_alive() + nalive_i - 2*nalive_i)/(dx*dx) + nalive_i*deathRate_i);
 
                     nalive_i += deltaN;
                     ndead_i += Math.abs(deltaN);
                 }else if(i==L-1){
-                    double deltaN = dt*(D*(0 + microhabitats[i-1].getN_alive() - 2*nalive_i)/(dx*dx)- nalive_i*deathRate_i);
+                    double deltaN = dt*(D*(nalive_i + microhabitats[i-1].getN_alive() - 2*nalive_i)/(dx*dx) + nalive_i*deathRate_i);
 
                     nalive_i += deltaN;
                     ndead_i += Math.abs(deltaN);
                 }else{
                     double deltaN = dt*(D*(microhabitats[i+1].getN_alive() + microhabitats[i-1].getN_alive() - 2*nalive_i)/(dx*dx)
-                            - nalive_i*deathRate_i);
+                            + nalive_i*deathRate_i);
 
                     nalive_i += deltaN;
                     ndead_i += Math.abs(deltaN);
@@ -154,28 +161,13 @@ public class BioSystem {
     }
 
 
-    public static void expGrad_popAndgRateDistbs(double biggestC, double dt, double dx){
-        int L = 10, nReps = 2;
-        int nMeasurements = 16;
 
-        double duration = 10.;
-        double interval = duration/nMeasurements;
+    public static void exponentialGradient_spatialAndGRateDistributions(double biggestC, double D, double dt, double dx){
 
-        double alpha = BioSystem.calculateAlpha(L, biggestC);
-        int S = 500;
-
-        String filename_alive = "FGTA_death-alpha="+String.valueOf(alpha)+"-aliveDistribution-continuum";
-        String filename_dead = "FGTA_death-alpha="+String.valueOf(alpha)+"-deadDistribution-continuum";
-        String filename_gRate = "FGTA_death-alpha="+String.valueOf(alpha)+"-gRateDistribution-continuum";
-    }
-
-
-    public static void exponentialGradient_spatialAndGRateDistributions(double biggestC, double dt, double dx){
-
-        int L = 10, nReps = 2;
+        int L = 5000, nReps = 1;
         int nTimeMeasurements = 20;
 
-        double duration = 2.;
+        double duration = 20000.;
         double interval = duration/(double)nTimeMeasurements;
 
         double alpha = BioSystem.calculateAlpha(L, biggestC);
@@ -184,35 +176,41 @@ public class BioSystem {
         String filename_alive = "FGTA_death-alpha="+String.valueOf(alpha)+"-aliveDistribution-continuum";
         String filename_dead = "FGTA_death-alpha="+String.valueOf(alpha)+"-deadDistribution-continuum";
         String filename_gRate = "FGTA_death-alpha="+String.valueOf(alpha)+"-gRateDistribution-continuum";
+        String filename_nutrients = "FGTA_death-alpha="+String.valueOf(alpha)+"-nutrientDistribution-continuum";
 
 
-        int[][][] allN_alive = new int[nReps][][];
-        int[][][] allN_dead = new int[nReps][][];
+        double[][][] allN_alive = new double[nReps][][];
+        double[][][] allN_dead = new double[nReps][][];
         double[][][] allGRates = new double[nReps][][];
+        double[][][] allNutrients = new double[nReps][][];
+
 
         for(int r = 0; r < nReps; r++){
 
             boolean alreadyRecorded = false;
 
-            int[][] alivePopsOverTime = new int[nTimeMeasurements+1][];
-            int[][] deadPopsOverTime = new int[nTimeMeasurements+1][];
+            double[][] alivePopsOverTime = new double[nTimeMeasurements+1][];
+            double[][] deadPopsOverTime = new double[nTimeMeasurements+1][];
             double[][] gRatesOverTime = new double[nTimeMeasurements+1][];
+            double[][] nutrientsOverTime = new double[nTimeMeasurements+1][];
             int timerCounter = 0;
 
 
-            BioSystem bs = new BioSystem(L, S, alpha, dt, dx);
+            BioSystem bs = new BioSystem(L, S, D, alpha, dt, dx);
 
             while(bs.timeElapsed <= duration+0.2*interval){
 
                 if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.1*interval) && !alreadyRecorded){
 
-                    System.out.println("rep: "+r+"\ttime elapsed: "+String.valueOf(bs.getTimeElapsed()));
+                    System.out.println("rep: "+r+"\ttime elapsed: "+String.valueOf(bs.getTimeElapsed()) );
+                    //"\ttotal N: "+String.valueOf(bs.getTotalN()));
 
                     //System.out.println(Arrays.toString(bs.getNutrientsArray()));
 
                     alivePopsOverTime[timerCounter] = bs.getLiveSpatialDistributionArray();
                     deadPopsOverTime[timerCounter] = bs.getDeadSpatialDistributionArray();
                     gRatesOverTime[timerCounter] = bs.getGrowthRatesArray();
+                    nutrientsOverTime[timerCounter] = bs.getNutrientsArray();
 
                     alreadyRecorded = true;
                     timerCounter++;
@@ -228,6 +226,7 @@ public class BioSystem {
             allN_alive[r] = alivePopsOverTime;
             allN_dead[r] = deadPopsOverTime;
             allGRates[r] = gRatesOverTime;
+            allNutrients[r] = nutrientsOverTime;
 
 
 
@@ -236,12 +235,14 @@ public class BioSystem {
         double[][] averagedAlivePopDistributions = Toolbox.averagedResults(allN_alive);
         double[][] averagedDeadPopDistributions = Toolbox.averagedResults(allN_dead);
         double[][] averagedGRateDistributions = Toolbox.averagedResults(allGRates);
+        double[][] averagedNutrientDistributions = Toolbox.averagedResults(allNutrients);
 
         //print the live and dead results to two separate files, then just join them together in
         //gnuplot or something
         Toolbox.printAveragedResultsToFile(filename_alive, averagedAlivePopDistributions);
         Toolbox.printAveragedResultsToFile(filename_dead, averagedDeadPopDistributions);
         Toolbox.printAveragedResultsToFile(filename_gRate, averagedGRateDistributions);
+        Toolbox.printAveragedResultsToFile(filename_nutrients, averagedNutrientDistributions);
 
     }
 

@@ -3,16 +3,15 @@
 public class Microhabitat {
 
     //no. of bacteria in the microhabitat
-    private int N_alive;
-    private int N_dead;
+    private double N_alive, N_dead;
     private double c;
-    int S, S_max;
+    private double S, S_max;
 
     //death and migration rates
     private double d = 0., b = 0.1;
     private double K_prime = 33.;
 
-    public Microhabitat(int S, double c){
+    public Microhabitat(double S, double c){
         this.S = S;
         this.S_max = S;
         this.c = c;
@@ -22,22 +21,22 @@ public class Microhabitat {
 
 
 
-    public int getS(){return S;}
+    public double getS(){return S;}
     public double getC(){return c;}
-    public int getN_alive(){return N_alive;}
-    public int getN_dead(){return N_dead;}
-    public int getN_tot(){return N_alive+N_dead;}
+    public double getN_alive(){return N_alive;}
+    public double getN_dead(){return N_dead;}
+    public double getN_tot(){return N_alive+N_dead;}
     public double getD(){return d;}
     public double getB(){return b;}
 
     //these voids are used to update the system via the diff eqns
-    public void setS(int S){
+    public void setS(double S){
         this.S = S;
     }
-    public void setN_alive(int N_alive){
+    public void setN_alive(double N_alive){
         this.N_alive = N_alive;
     }
-    public void setN_dead(int N_dead){
+    public void setN_dead(double N_dead){
         this.N_dead = N_dead;
     }
 
