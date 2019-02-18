@@ -115,7 +115,7 @@ public class BioSystem {
 
             if(microhabitats[i].itIsGrowing()){
 
-                double growthRate_i = microhabitats[i].replication_rate();
+                double growthRate_i = microhabitats[i].replication_rate_noisy();
                 s_i += -dt*nalive_i*growthRate_i;
 
 
@@ -167,16 +167,16 @@ public class BioSystem {
         int L = 5000, nReps = 1;
         int nTimeMeasurements = 20;
 
-        double duration = 20000.;
+        double duration = 2000.;
         double interval = duration/(double)nTimeMeasurements;
 
         double alpha = BioSystem.calculateAlpha(L, biggestC);
         int S = 500;
 
-        String filename_alive = "FGTA_death-alpha="+String.valueOf(alpha)+"-aliveDistribution-continuum";
-        String filename_dead = "FGTA_death-alpha="+String.valueOf(alpha)+"-deadDistribution-continuum";
-        String filename_gRate = "FGTA_death-alpha="+String.valueOf(alpha)+"-gRateDistribution-continuum";
-        String filename_nutrients = "FGTA_death-alpha="+String.valueOf(alpha)+"-nutrientDistribution-continuum";
+        String filename_alive = "FGTA_death-alpha="+String.valueOf(alpha)+"-aliveDistribution-continuum-NOISY";
+        String filename_dead = "FGTA_death-alpha="+String.valueOf(alpha)+"-deadDistribution-continuum-NOISY";
+        String filename_gRate = "FGTA_death-alpha="+String.valueOf(alpha)+"-gRateDistribution-continuum-NOISY";
+        String filename_nutrients = "FGTA_death-alpha="+String.valueOf(alpha)+"-nutrientDistribution-continuum-NOISY";
 
 
         double[][][] allN_alive = new double[nReps][][];

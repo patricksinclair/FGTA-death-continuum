@@ -68,6 +68,11 @@ public class Microhabitat {
         return phi_c()*(S/(K_prime + S));
     }
 
+    public double replication_rate_noisy(){
+        double noise = (Math.random()*(0.1 - (-0.1))) + (-0.1); //random noise between -0.1 and 0.1
+        return phi_c()*(S/(K_prime + S))*(1. + noise);
+    }
+
     public double death_rate(){
         //use this if phi(c) is negative
         //it will therefore return a negative value
